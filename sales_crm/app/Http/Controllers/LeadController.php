@@ -14,7 +14,32 @@ class LeadController extends Controller
             ? Lead::query()
             : Lead::where('user_id', $request->user()->id);
 
-        $leads = $query->with('user')->latest()->paginate(10);
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by assigned user (admin only)
+        if ($request->filled('user_id') && $request->user()->role === 'admin') {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Filter by source
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+
+        // Date range filter (created_at)
+        if ($request->filled('from') && $request->filled('to')) {
+            $query->whereBetween('created_at', [$request->from, $request->to]);
+        }
+
+        $leads = $query->with('user')->latest()->paginate(10)->withQueryString();
         $salesUsers = User::where('role', 'sales')->get();
 
         return view('leads.index', compact('leads', 'salesUsers'));

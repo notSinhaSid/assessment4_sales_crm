@@ -22,6 +22,60 @@
                     </a>
                 @endif
 
+                {{-- Filter form --}}
+                <form method="GET" action="{{ route('leads.index') }}" class="row g-2 mb-3">
+                    <div class="col-auto">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name" class="form-control">
+                    </div>
+
+                    <div class="col-auto">
+                        <select name="status" class="form-control">
+                            <option value="">All Statuses</option>
+                            @foreach(['new', 'contacted', 'qualified', 'converted', 'lost'] as $status)
+                                <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
+                                    {{ ucfirst($status) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    @if(auth()->user()->role === 'admin')
+                        <div class="col-auto">
+                            <select name="user_id" class="form-control">
+                                <option value="">All Sales Users</option>
+                                @foreach($salesUsers as $user)
+                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+
+                    <div class="col-auto">
+                        <select name="source" class="form-control">
+                            <option value="">All Sources</option>
+                            @foreach(['website', 'call', 'referral'] as $source)
+                                <option value="{{ $source }}" {{ request('source') === $source ? 'selected' : '' }}>
+                                    {{ ucfirst($source) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-auto">
+                        <input type="date" name="from" value="{{ request('from') }}" class="form-control">
+                    </div>
+                    <div class="col-auto">
+                        <input type="date" name="to" value="{{ request('to') }}" class="form-control">
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{{ route('leads.index') }}" class="btn btn-secondary">Reset</a>
+                    </div>
+                </form>
+
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
